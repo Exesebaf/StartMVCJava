@@ -18,7 +18,6 @@ public class PageImplCustom extends PageImpl {
     public String toString() {
         String contentType = "UNKNOWN";
         List<User> content = getContent();
-//        return String.format("Page %s of %d containing %s instances", getNumber() + 1, getTotalPages(), contentType);
         if (!content.isEmpty() && content.get(0) != null) {
             contentType = content.get(0).getClass().getName();
         }
