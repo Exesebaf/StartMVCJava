@@ -20,13 +20,14 @@
     <jackson.version>2.13.5</jackson.version>
     <postgres.version>42.6.0</postgres.version>
     <spring-data-jpa.version>2.7.15</spring-data-jpa.version>
+    <hibernate.version>5.5.7.Final</hibernate.version>
   </properties>
   <dependencies>
 
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <version>${spring.version}</version>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webmvc</artifactId>
+    <version>${spring.version}</version>
     </dependency>
 
     <dependency>
@@ -96,20 +97,17 @@
       <version>${lombok.version}</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
       <version>${spring-data-jpa.version}</version>
     </dependency>
 
-
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.30</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -123,17 +121,17 @@
       <artifactId>log4j-core</artifactId>
       <version>2.20.0</version>
     </dependency>
+
     <dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-api</artifactId>
-    <version>5.7.2</version>
-    <scope>test</scope>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <version>${hibernate.version}</version>
     </dependency>
+
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${hibernate.version}</version>
     </dependency>
 
   </dependencies>
