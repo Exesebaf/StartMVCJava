@@ -40,8 +40,18 @@ public class UserController {
      * @param updateInfoRequest новая информация о пользователе
      * @return updateInfoRequest
      */
-    @PutMapping
+    @PutMapping("/info")
     public ResponseEntity<UpdateUserInfoResponse> updateUser(
+            @RequestBody UpdateUserInfoRequest updateInfoRequest) {
+        return ResponseEntity.ok(userService.updateUser(updateInfoRequest));
+    }
+    /**
+     * позволяет изменить пароль
+     * @param updateInfoRequest новая информация о пользователе
+     * @return updateInfoRequest
+     */
+    @PutMapping()
+    public ResponseEntity<UpdateUserInfoResponse> updatePasswordUser(
             @RequestBody UpdateUserInfoRequest updateInfoRequest) {
         return ResponseEntity.ok(userService.updateUser(updateInfoRequest));
     }

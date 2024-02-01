@@ -1,13 +1,13 @@
 package com.start.mvc.repository;
 
 import java.util.List;
+
+import java.util.List;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
 import com.start.mvc.entity.User;
 
 
-@Repository
-public interface UserRepository {
+public interface UserRepository  {
     /**
      * Получение информации о пользователях постранично
      *
@@ -30,7 +30,7 @@ public interface UserRepository {
      * @param nickname ник пользователя
      * @return возвращает информацию о пользователе
      */
-    User findByNickname(String nickname);
+    User findByUsername(String nickname);
 
     /**
      * Проверяет существует ли в базе пользователь стаким ником
@@ -38,7 +38,15 @@ public interface UserRepository {
      * @param nickname ник пользователя
      * @return возвращает ответ true если в базе присутствует
      */
-    boolean existsByNickname(String nickname);
+    boolean existsByUsername(String nickname);
+
+    /**
+     * Проверяет существует ли в базе пользователь стаким эмейлом
+     *
+     * @param email email пользователя
+     * @return возвращает ответ true если в базе присутствует
+     */
+    boolean existsByEmail(String email);
 
     /**
      * Обновляет информацию о пользователе
@@ -48,3 +56,4 @@ public interface UserRepository {
      */
     boolean update(User user);
 }
+

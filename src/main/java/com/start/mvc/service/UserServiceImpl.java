@@ -12,11 +12,12 @@ import com.start.mvc.exception.NickNameBusyException;
 import com.start.mvc.exception.UserNotFoundException;
 import com.start.mvc.mapper.UserMapper;
 import com.start.mvc.repository.UserRepository;
-import com.start.mvc.util.PageImplCustom;
 import com.start.mvc.util.UserValidator;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 
         private final UserRepository userRepository;
@@ -47,10 +47,12 @@ public class UserServiceImpl implements UserService{
         @Override
         public RegisterUserResponse registerNewUser(RegisterUserRequest userRequest) {
             String userName = userRequest.getUserName();
+            String email = userRequest.getEmail();
             User user;
             if (validator.isValid(userRequest)) {
                 user = mapper.userRequestToUser(userRequest);
-                if (userRepository.existsByNickname(userName)) {
+                if (userRepository.existsByUsername(userName)
+                        || userRepository.existsByEmail(email)) {
                     throw new NickNameBusyException(userName);
                 } else {
                     userRepository.save(user);
@@ -74,8 +76,8 @@ public class UserServiceImpl implements UserService{
             String pass = updatePasswordRequest.getPassword();
             String newPass = updatePasswordRequest.getNewPassword();
             if (validator.isValid(updatePasswordRequest)) {
-                if (userRepository.existsByNickname(nickName)) {
-                    User user = userRepository.findByNickname(nickName);
+                if (userRepository.existsByUsername(nickName)) {
+                    User user = userRepository.findByUsername(nickName);
                     if (user.getPassword().equals(pass)) {
                         user.setPassword(newPass);
                         userRepository.update(user);
@@ -100,10 +102,12 @@ public class UserServiceImpl implements UserService{
         @Override
         public UpdateUserInfoResponse updateUser(UpdateUserInfoRequest updateInfoRequest) {
             String nickName = updateInfoRequest.getUserName();
+            String email = updateInfoRequest.getEmail();
             String pass = updateInfoRequest.getPassword();
             if (validator.isValid(updateInfoRequest)) {
-                if (userRepository.existsByNickname(nickName)) {
-                    User user = userRepository.findByNickname(nickName);
+                if (userRepository.existsByUsername(nickName)
+                        || userRepository.existsByEmail(email)) {
+                    User user = userRepository.findByUsername(nickName);
                     if (user.getPassword().equals(pass)) {
                         user.setLastName(updateInfoRequest.getLastName());
                         user.setEmail(updateInfoRequest.getEmail());
@@ -137,8 +141,8 @@ public class UserServiceImpl implements UserService{
             String nickName = authUserRequest.getUserName();
             String pass = authUserRequest.getPassword();
             if (validator.isValid(authUserRequest)) {
-                if (userRepository.existsByNickname(nickName)) {
-                    User user = userRepository.findByNickname(nickName);
+                if (userRepository.existsByUsername(nickName)){
+                    User user = userRepository.findByUsername(nickName);
                     if (user.getPassword().equals(pass)) {
                         return AuthUserResponse.builder()
                                 .secret("user")
@@ -166,6 +170,16 @@ public class UserServiceImpl implements UserService{
         for (User u : users) {
             usersResponse.add(mapper.userToUserResponse(u));
         }
-        return new PageImplCustom(usersResponse);
+        return new PageImpl(usersResponse);
+    }
+
+    @Autowired
+    public UserServiceImpl(
+            @Qualifier(value = "userRepositoryByHibernete")
+            UserRepository userRepository,
+            UserMapper mapper, UserValidator validator) {
+        this.userRepository = userRepository;
+        this.mapper = mapper;
+        this.validator = validator;
     }
 }

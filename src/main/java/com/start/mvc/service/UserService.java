@@ -50,3 +50,4 @@ public interface UserService {
          */
         UpdatePasswordResponse updateUser(UpdatePasswordRequest updatePasswordRequest);
 }
+
