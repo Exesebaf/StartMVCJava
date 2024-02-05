@@ -8,7 +8,7 @@ import com.start.mvc.dto.responce.UserResponse;
 import com.start.mvc.entity.User;
 import org.springframework.stereotype.Component;
 /**
- * В основном жто перегоньщик User для защиты данный в другом случае надо было бы использовать Mapstract
+ * В основном это перегоньщик User для защиты данный в другом случае надо было бы использовать Mapstract
  * в пользователя (entity)
  *
  */

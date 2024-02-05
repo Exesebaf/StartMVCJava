@@ -47,7 +47,7 @@ public class UserRepositoryByHibernete implements UserRepository {
     public List<User> findAll(Pageable pageable) {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
-        List<User> users = session.createQuery("SELECT u FROM User u", User.class)
+        List<User> users = session.createQuery("select u from User u", User.class)
                 .getResultList();
         session.getTransaction().commit();
         session.close();

@@ -1,48 +1,32 @@
 package com.start.mvc;
 
-import com.start.mvc.dto.request.RegisterUserRequest;
-import com.start.mvc.dto.responce.RegisterUserResponse;
-import com.start.mvc.entity.User;
 import com.start.mvc.exception.InvalidRequestException;
-import com.start.mvc.mapper.UserMapper;
-import com.start.mvc.repository.impl.UserRepositoryImpl;
-import com.start.mvc.service.UserService;
-import com.start.mvc.service.UserServiceImpl;
-import com.start.mvc.util.UserValidator;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import com.start.mvc.repository.impl.UserRepositoryByJPA;
+import com.start.mvc.entity.User;
+import com.start.mvc.dto.responce.RegisterUserResponse;
+import com.start.mvc.dto.request.RegisterUserRequest;
+import com.start.mvc.service.UserService;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
+@SpringBootTest
+@ComponentScan(basePackages = "com.start.mvc")
 public class UserServiceImplTest {
 
 
 
-        private UserService userService;
+    @Autowired
+    private UserService userService;
 
-        public UserServiceImplTest() {
-            this.userService = new UserServiceImpl(new UserRepositoryImpl(),
-                    new UserMapper(), new UserValidator());
-        }
+    @Autowired
+    private UserRepositoryByJPA userRepository;
 
-    @Test
-    void testRegisterNewUserThenAllOK1() {
-        // Подготовка данных
-        RegisterUserRequest userRequest = RegisterUserRequest.builder()
-                .userName("Alisa")
-                .lastName("Carrl")
-                .email("catr.corap@gmail.com")
-                .age(45)
-                .password("scZsc")
-                .build();
 
-        RegisterUserResponse expectedResponse = RegisterUserResponse.builder()
-                .userName("Alisa")
-                .lastName("Carrl")
-                .email("catr.corap@gmail.com")
-                .age(45)
-                .build();
-    }
 
 
 
@@ -111,6 +95,30 @@ public class UserServiceImplTest {
             assertThrows(InvalidRequestException.class,
                     () -> userService.registerNewUser(userRequest));
         }
+
+    @Test
+    void testRegisterNewUserThenAllOK1() {
+        RegisterUserRequest userRequest = RegisterUserRequest.builder()
+                .userName("Alisa")
+                .lastName("Carrl")
+                .email("catr.corap@gmail.com")
+                .age(45)
+                .password("scZsc")
+                .build();
+        User userFind = userRepository.findByUserName(userRequest.getUserName());
+        if(userFind!=null) {
+            userRepository.delete(userFind);
+        }
+        RegisterUserResponse userInDataActual = userService.registerNewUser(userRequest);
+
+        RegisterUserResponse expectedResponse = RegisterUserResponse.builder()
+                .userName("Alisa")
+                .lastName("Carrl")
+                .email("catr.corap@gmail.com")
+                .age(45)
+                .build();
+        assertEquals(expectedResponse, userInDataActual);
+    }
 
 
 }

@@ -11,11 +11,10 @@ import com.start.mvc.exception.InvalidRequestException;
 import com.start.mvc.exception.NickNameBusyException;
 import com.start.mvc.exception.UserNotFoundException;
 import com.start.mvc.mapper.UserMapper;
-import com.start.mvc.repository.UserRepository;
+import com.start.mvc.repository.impl.UserRepositoryByJPA;
 import com.start.mvc.util.UserValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +28,20 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService{
 
-        private final UserRepository userRepository;
+        private final UserRepositoryByJPA userRepository;
 
         private final UserMapper mapper;
 
         private final UserValidator validator;
+
+    @Autowired
+    public UserServiceImpl(
+            UserRepositoryByJPA userRepository,
+            UserMapper mapper, UserValidator validator) {
+        this.userRepository = userRepository;
+        this.mapper = mapper;
+        this.validator = validator;
+    }
 
 
 
@@ -51,14 +59,14 @@ public class UserServiceImpl implements UserService{
             User user;
             if (validator.isValid(userRequest)) {
                 user = mapper.userRequestToUser(userRequest);
-                if (userRepository.existsByUsername(userName)
+                if (userRepository.existsByUserName(userName)
                         || userRepository.existsByEmail(email)) {
-                    throw new NickNameBusyException(userName);
+                    throw new NickNameBusyException(userName + " "+ email);
                 } else {
                     userRepository.save(user);
                 }
             } else {
-                throw new InvalidRequestException("Invalid data request");
+                throw new InvalidRequestException("");
             }
             return mapper.userToRegisterUserResponse(user);
         }
@@ -72,24 +80,24 @@ public class UserServiceImpl implements UserService{
         @Override
         public UpdatePasswordResponse updateUser(
                 UpdatePasswordRequest updatePasswordRequest) {
-            String nickName = updatePasswordRequest.getUserName();
+            String userName = updatePasswordRequest.getUserName();
             String pass = updatePasswordRequest.getPassword();
             String newPass = updatePasswordRequest.getNewPassword();
             if (validator.isValid(updatePasswordRequest)) {
-                if (userRepository.existsByUsername(nickName)) {
-                    User user = userRepository.findByUsername(nickName);
+                if (userRepository.existsByUserName(userName)) {
+                    User user = userRepository.findByUserName(userName);
                     if (user.getPassword().equals(pass)) {
                         user.setPassword(newPass);
-                        userRepository.update(user);
+                        userRepository.save(user);
                         return new UpdatePasswordResponse("Password updated");
                     } else {
-                        throw new IncorrectPasswordException(nickName);
+                        throw new IncorrectPasswordException(userName);
                     }
                 } else {
-                    throw new UserNotFoundException(nickName);
+                    throw new UserNotFoundException(userName);
                 }
             } else {
-                throw new InvalidRequestException("Invalid data request");
+                throw new InvalidRequestException("");
             }
         }
 
@@ -101,18 +109,18 @@ public class UserServiceImpl implements UserService{
          */
         @Override
         public UpdateUserInfoResponse updateUser(UpdateUserInfoRequest updateInfoRequest) {
-            String nickName = updateInfoRequest.getUserName();
+            String userName = updateInfoRequest.getUserName();
             String email = updateInfoRequest.getEmail();
             String pass = updateInfoRequest.getPassword();
             if (validator.isValid(updateInfoRequest)) {
-                if (userRepository.existsByUsername(nickName)
+                if (userRepository.existsByUserName(userName)
                         || userRepository.existsByEmail(email)) {
-                    User user = userRepository.findByUsername(nickName);
+                    User user = userRepository.findByUserName(userName);
                     if (user.getPassword().equals(pass)) {
                         user.setLastName(updateInfoRequest.getLastName());
                         user.setEmail(updateInfoRequest.getEmail());
                         user.setAge(updateInfoRequest.getAge());
-                        userRepository.update(user);
+                        userRepository.save(user);
                         return UpdateUserInfoResponse.builder()
                                 .userName(updateInfoRequest.getUserName())
                                 .lastName(updateInfoRequest.getLastName())
@@ -120,13 +128,13 @@ public class UserServiceImpl implements UserService{
                                 .age(updateInfoRequest.getAge())
                                 .build();
                     } else {
-                        throw new IncorrectPasswordException(nickName);
+                        throw new IncorrectPasswordException(userName);
                     }
                 } else {
-                    throw new UserNotFoundException(nickName);
+                    throw new UserNotFoundException(userName);
                 }
             } else {
-                throw new InvalidRequestException("Invalid data request");
+                throw new InvalidRequestException("");
             }
         }
 
@@ -138,24 +146,27 @@ public class UserServiceImpl implements UserService{
          */
         @Override
         public AuthUserResponse authUser(AuthUserRequest authUserRequest) {
-            String nickName = authUserRequest.getUserName();
+            String userName = authUserRequest.getUserName();
             String pass = authUserRequest.getPassword();
             if (validator.isValid(authUserRequest)) {
-                if (userRepository.existsByUsername(nickName)){
-                    User user = userRepository.findByUsername(nickName);
+                if (userRepository.existsByUserName(userName)){
+                    User user = userRepository.findByUserName(userName);
+                    if (user == null) {
+                        throw new UserNotFoundException(userName);
+                    }
                     if (user.getPassword().equals(pass)) {
                         return AuthUserResponse.builder()
                                 .secret("user")
                                 .jwt(UUID.randomUUID().toString())
                                 .build();
                     } else {
-                        throw new IncorrectPasswordException(nickName);
+                        throw new IncorrectPasswordException(userName);
                     }
                 } else {
-                    throw new UserNotFoundException(nickName);
+                    throw new UserNotFoundException(userName);
                 }
             } else {
-                throw new InvalidRequestException("Invalid data request");
+                throw new InvalidRequestException("");
             }
         }
     /**
@@ -165,7 +176,7 @@ public class UserServiceImpl implements UserService{
      */
     @Override
     public Page<UserResponse> getUsers(Pageable pageable) {
-        List<User> users = userRepository.findAll(pageable);
+        List<User> users = userRepository.findAll(pageable).toList();
         List<UserResponse> usersResponse = new ArrayList<>();
         for (User u : users) {
             usersResponse.add(mapper.userToUserResponse(u));
@@ -173,13 +184,5 @@ public class UserServiceImpl implements UserService{
         return new PageImpl(usersResponse);
     }
 
-    @Autowired
-    public UserServiceImpl(
-            @Qualifier(value = "userRepositoryByHibernete")
-            UserRepository userRepository,
-            UserMapper mapper, UserValidator validator) {
-        this.userRepository = userRepository;
-        this.mapper = mapper;
-        this.validator = validator;
-    }
+
 }

@@ -2,12 +2,15 @@ package com.start.mvc.controller;
 
 import com.start.mvc.dto.request.AuthUserRequest;
 import com.start.mvc.dto.request.RegisterUserRequest;
+import com.start.mvc.dto.request.UpdatePasswordRequest;
 import com.start.mvc.dto.request.UpdateUserInfoRequest;
 import com.start.mvc.dto.responce.AuthUserResponse;
 import com.start.mvc.dto.responce.RegisterUserResponse;
+import com.start.mvc.dto.responce.UpdatePasswordResponse;
 import com.start.mvc.dto.responce.UpdateUserInfoResponse;
 import com.start.mvc.dto.responce.UserResponse;
 import com.start.mvc.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,13 +50,13 @@ public class UserController {
     }
     /**
      * позволяет изменить пароль
-     * @param updateInfoRequest новая информация о пользователе
+     * @param updatePassRequest новая информация о пользователе
      * @return updateInfoRequest
      */
     @PutMapping()
-    public ResponseEntity<UpdateUserInfoResponse> updatePasswordUser(
-            @RequestBody UpdateUserInfoRequest updateInfoRequest) {
-        return ResponseEntity.ok(userService.updateUser(updateInfoRequest));
+    public ResponseEntity<UpdatePasswordResponse> updatePasswordUser(
+            @RequestBody UpdatePasswordRequest updatePassRequest) {
+        return ResponseEntity.ok(userService.updateUser(updatePassRequest));
     }
 
     /**
